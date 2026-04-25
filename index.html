@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Live Project Internship Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#040b14;
+  --bg2:#071020;
+  --bg3:#0a1628;
+  --surface:#0d1f35;
+  --surface2:#102540;
+  --border:rgba(0,200,255,0.12);
+  --border2:rgba(0,200,255,0.25);
+  --cyan:#00c8ff;
+  --cyan2:#00e5ff;
+  --green:#00ff9d;
+  --orange:#ff7b2c;
+  --pink:#ff2d78;
+  --yellow:#ffe44d;
+  --white:#e8f4ff;
+  --muted:#5a7a9a;
+  --mono:'Space Mono',monospace;
+  --display:'Outfit',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--display);background:var(--bg);color:var(--white);overflow-x:hidden}
+
+/* NOISE TEXTURE */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:0.4;
+}
+
+/* SCAN LINES */
+body::after{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,200,255,0.01) 2px,rgba(0,200,255,0.01) 4px);
+  pointer-events:none;z-index:0;
+}
+
+/* GRID BG */
+.grid-bg{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%);
+}
+
+/* GLOW ORBS */
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(80px);opacity:0.15}
+.orb1{width:500px;height:500px;background:var(--cyan);top:-100px;right:-100px}
+.orb2{width:400px;height:400px;background:var(--pink);bottom:-100px;left:-100px}
+.orb3{width:300px;height:300px;background:var(--green);top:40%;left:30%}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem 3.5rem;
+  background:rgba(4,11,20,0.8);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+}
+.nav-logo{
+  font-family:var(--mono);font-weight:700;font-size:1.1rem;
+  color:var(--cyan);text-decoration:none;letter-spacing:0.08em;
+}
+.nav-logo .bracket{color:var(--muted)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{
+  font-family:var(--mono);font-size:0.72rem;letter-spacing:0.12em;
+  text-transform:uppercase;text-decoration:none;color:var(--muted);
+  transition:color 0.2s;padding:0.3rem 0;
+  border-bottom:1px solid transparent;
+}
+.nav-links a:hover{color:var(--cyan);border-bottom-color:var(--cyan)}
+.nav-badge{
+  font-family:var(--mono);font-size:0.7rem;
+  border:1px solid var(--cyan);color:var(--cyan);
+  padding:0.4rem 1rem;letter-spacing:0.1em;text-decoration:none;
+  transition:background 0.2s;
+}
+.nav-badge:hover{background:rgba(0,200,255,0.1)}
+
+/* HERO */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:8rem 3.5rem 4rem;position:relative;z-index:1;
+}
+.hero-pre{
+  font-family:var(--mono);font-size:0.75rem;color:var(--green);
+  letter-spacing:0.15em;margin-bottom:1.5rem;
+  display:flex;align-items:center;gap:0.8rem;
+}
+.blink{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.hero h1{
+  font-family:var(--display);font-weight:900;
+  font-size:clamp(3.5rem,9vw,8rem);line-height:0.9;
+  letter-spacing:-0.04em;margin-bottom:1.5rem;
+}
+.hero h1 .word1{
+  display:block;
+  background:linear-gradient(90deg,var(--white) 0%,var(--cyan2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero h1 .word2{
+  display:block;color:transparent;
+  -webkit-text-stroke:2px rgba(0,200,255,0.4);
+  font-size:clamp(3rem,7vw,6.5rem);
+}
+.hero h1 .word3{
+  display:block;
+  background:linear-gradient(90deg,var(--orange),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-sub{
+  font-size:1.05rem;color:var(--muted);line-height:1.75;
+  max-width:520px;margin-bottom:2.5rem;font-weight:300;
+}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:4rem}
+
+.btn-glow{
+  display:inline-flex;align-items:center;gap:0.6rem;
+  background:var(--cyan);color:var(--bg);
+  padding:0.85rem 2rem;font-weight:700;font-size:0.88rem;
+  text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;
+  transition:box-shadow 0.3s,transform 0.2s;
+}
+.btn-glow:hover{
+  box-shadow:0 0 30px rgba(0,200,255,0.5),0 0 60px rgba(0,200,255,0.2);
+  transform:translateY(-2px);
+}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:0.6rem;
+  background:transparent;color:var(--white);
+  border:1px solid var(--border2);
+  padding:0.85rem 2rem;font-weight:500;font-size:0.88rem;
+  text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;
+  transition:border-color 0.2s,background 0.2s;
+}
+.btn-outline:hover{border-color:var(--cyan);background:rgba(0,200,255,0.05)}
+
+/* STATS */
+.hero-stats{
+  display:flex;gap:3rem;flex-wrap:wrap;
+  border-top:1px solid var(--border);padding-top:2rem;
+}
+.stat{position:relative}
+.stat .num{
+  font-family:var(--mono);font-size:2.2rem;font-weight:700;
+  color:var(--cyan);line-height:1;margin-bottom:0.3rem;
+}
+.stat .label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em}
+
+/* TERMINAL PANEL */
+.terminal{
+  position:absolute;right:3.5rem;top:50%;transform:translateY(-50%);
+  width:400px;background:rgba(13,31,53,0.9);
+  border:1px solid var(--border2);
+  backdrop-filter:blur(20px);
+  font-family:var(--mono);font-size:0.78rem;
+  box-shadow:0 0 60px rgba(0,200,255,0.1),inset 0 1px 0 rgba(255,255,255,0.05);
+  animation:fadeInRight 0.8s 0.4s ease both;
+}
+@keyframes fadeInRight{from{opacity:0;transform:translateY(-50%) translateX(30px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+.terminal-bar{
+  display:flex;align-items:center;gap:0.5rem;
+  padding:0.7rem 1rem;border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,0.2);
+}
+.t-dot{width:10px;height:10px;border-radius:50%}
+.t-title{margin-left:auto;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em}
+.terminal-body{padding:1.2rem}
+.t-line{margin-bottom:0.4rem;line-height:1.6}
+.t-prompt{color:var(--green)}
+.t-cmd{color:var(--white)}
+.t-out{color:var(--muted);padding-left:1rem}
+.t-success{color:var(--green)}
+.t-warn{color:var(--yellow)}
+.t-error{color:var(--pink)}
+.t-cyan{color:var(--cyan)}
+.typing-cursor{display:inline-block;width:8px;height:14px;background:var(--cyan);animation:blink 1s step-end infinite;vertical-align:middle}
+
+/* LIVE TICKER */
+.ticker{
+  background:rgba(0,200,255,0.05);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:0.7rem 0;overflow:hidden;position:relative;z-index:1;
+}
+.ticker-inner{display:flex;gap:3rem;white-space:nowrap;animation:ticker 25s linear infinite}
+.ticker-item{
+  font-family:var(--mono);font-size:0.7rem;
+  color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;
+  display:flex;align-items:center;gap:0.8rem;
+}
+.ticker-item .live{color:var(--green);font-weight:700}
+.ticker-item .sep{color:var(--border2)}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTION BASE */
+section{padding:6rem 3.5rem;position:relative;z-index:1}
+.section-tag{
+  font-family:var(--mono);font-size:0.7rem;color:var(--cyan);
+  letter-spacing:0.2em;text-transform:uppercase;
+  margin-bottom:1rem;display:flex;align-items:center;gap:0.6rem;
+}
+.section-tag::before{content:'//';color:var(--muted)}
+h2{
+  font-family:var(--display);font-weight:900;
+  font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.03em;
+  line-height:1.05;margin-bottom:0.8rem;
+}
+.section-sub{font-size:0.95rem;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:3rem}
+
+/* LIVE PROJECTS */
+.projects-section{background:var(--bg2)}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1px;background:var(--border)}
+.project-card{
+  background:var(--bg2);padding:2rem;
+  position:relative;overflow:hidden;
+  transition:background 0.3s;
+}
+.project-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,200,255,0.06) 0%,transparent 60%);
+  opacity:0;transition:opacity 0.3s;pointer-events:none;
+}
+.project-card:hover{background:var(--bg3)}
+.project-card:hover::after{opacity:1}
+
+.project-id{
+  font-family:var(--mono);font-size:0.65rem;color:var(--muted);
+  letter-spacing:0.15em;margin-bottom:1rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.status-badge{
+  font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;
+  padding:0.2rem 0.6rem;
+}
+.status-live{background:rgba(0,255,157,0.1);color:var(--green);border:1px solid rgba(0,255,157,0.3)}
+.status-build{background:rgba(255,123,44,0.1);color:var(--orange);border:1px solid rgba(255,123,44,0.3)}
+.status-deploy{background:rgba(0,200,255,0.1);color:var(--cyan);border:1px solid rgba(0,200,255,0.3)}
+
+.project-card h3{
+  font-family:var(--display);font-size:1.2rem;font-weight:700;
+  margin-bottom:0.6rem;color:var(--white);
+}
+.project-card p{font-size:0.85rem;color:var(--muted);line-height:1.65;margin-bottom:1.5rem}
+
+.progress-track{height:2px;background:rgba(255,255,255,0.06);margin-bottom:0.4rem}
+.progress-bar{height:100%;transition:width 1.5s cubic-bezier(0.4,0,0.2,1)}
+.progress-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-bottom:1.2rem}
+
+.tech-stack{display:flex;gap:0.4rem;flex-wrap:wrap}
+.tech{
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;
+  padding:0.2rem 0.6rem;border:1px solid var(--border);color:var(--muted);
+}
+
+/* SKILLS */
+.skills-section{background:var(--bg)}
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.skill-card{
+  border:1px solid var(--border);background:var(--surface);
+  padding:1.8rem;position:relative;overflow:hidden;
+  transition:border-color 0.3s,transform 0.3s;
+}
+.skill-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  transform:scaleX(0);transform-origin:left;transition:transform 0.4s ease;
+}
+.skill-card:hover{border-color:rgba(0,200,255,0.4);transform:translateY(-4px)}
+.skill-card:hover::before{transform:scaleX(1)}
+
+.sk1::before{background:linear-gradient(90deg,var(--cyan),var(--cyan2))}
+.sk2::before{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.sk3::before{background:linear-gradient(90deg,var(--orange),var(--yellow))}
+.sk4::before{background:linear-gradient(90deg,var(--pink),var(--orange))}
+.sk5::before{background:linear-gradient(90deg,var(--cyan),var(--green))}
+.sk6::before{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+
+.skill-num{
+  font-family:var(--mono);font-size:0.65rem;color:var(--muted);
+  letter-spacing:0.15em;margin-bottom:0.8rem;
+}
+.skill-card h3{
+  font-family:var(--display);font-size:1rem;font-weight:700;
+  color:var(--white);margin-bottom:0.5rem;
+}
+.skill-card p{font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.2rem}
+.skill-links-list{display:flex;flex-direction:column;gap:0.4rem}
+.slink{
+  display:flex;align-items:center;gap:0.7rem;
+  padding:0.5rem 0.8rem;
+  border:1px solid var(--border);
+  color:var(--muted);text-decoration:none;font-size:0.78rem;
+  font-family:var(--mono);
+  transition:color 0.2s,border-color 0.2s,background 0.2s;
+  position:relative;
+}
+.slink::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:0;background:var(--cyan);transition:width 0.2s;
+}
+.slink:hover{color:var(--white);border-color:var(--cyan);background:rgba(0,200,255,0.04)}
+.slink:hover::before{width:2px}
+.slink-arrow{margin-left:auto;opacity:0;transition:opacity 0.2s,transform 0.2s;font-size:0.7rem}
+.slink:hover .slink-arrow{opacity:1;transform:translateX(2px)}
+.slink-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+/* TIMELINE */
+.timeline-section{background:var(--bg2)}
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;border:1px solid var(--border)}
+.tl-item{
+  padding:2rem;border-right:1px solid var(--border);
+  position:relative;overflow:hidden;
+  transition:background 0.2s;
+}
+.tl-item:last-child{border-right:none}
+.tl-item:hover{background:var(--surface)}
+.tl-item::after{
+  content:attr(data-week);
+  position:absolute;bottom:-10px;right:-5px;
+  font-family:var(--mono);font-size:4rem;font-weight:700;
+  opacity:0.04;color:var(--cyan);line-height:1;pointer-events:none;
+}
+.tl-phase{font-family:var(--mono);font-size:0.65rem;color:var(--cyan);letter-spacing:0.12em;margin-bottom:0.6rem}
+.tl-item h3{font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;color:var(--white)}
+.tl-item p{font-size:0.78rem;color:var(--muted);line-height:1.6}
+.tl-bar{height:3px;margin-bottom:1.2rem;border-radius:0}
+
+/* LEADERBOARD */
+.leader-section{background:var(--bg)}
+.leader-table{width:100%;border-collapse:collapse;border:1px solid var(--border)}
+.leader-table th{
+  font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--muted);
+  padding:0.8rem 1.2rem;border-bottom:1px solid var(--border);
+  background:var(--surface);text-align:left;
+}
+.leader-table td{
+  padding:1rem 1.2rem;border-bottom:1px solid rgba(0,200,255,0.06);
+  font-size:0.85rem;
+}
+.leader-table tr:last-child td{border-bottom:none}
+.leader-table tr:hover td{background:var(--surface)}
+.rank-1{color:var(--yellow);font-family:var(--mono);font-weight:700}
+.rank-2{color:var(--muted);font-family:var(--mono)}
+.rank-3{color:var(--orange);font-family:var(--mono)}
+.intern-name{font-weight:600;color:var(--white)}
+.intern-role{font-size:0.72rem;color:var(--muted)}
+.score{font-family:var(--mono);color:var(--cyan);font-size:0.9rem}
+.xp-bar{height:4px;background:rgba(0,200,255,0.08);margin-top:4px}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green))}
+
+/* APPLY */
+.apply-section{
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+}
+.apply-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.apply-left h2{margin-bottom:1rem}
+.apply-info{display:flex;flex-direction:column;gap:1.2rem;margin-top:2rem}
+.info-item{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1rem;border:1px solid var(--border);background:var(--surface);
+}
+.info-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}
+.info-title{font-size:0.82rem;font-weight:600;color:var(--white);margin-bottom:0.2rem}
+.info-desc{font-size:0.76rem;color:var(--muted);line-height:1.5}
+
+.apply-form{display:flex;flex-direction:column;gap:1rem}
+.field-group{display:flex;flex-direction:column;gap:0.4rem}
+.field-group label{font-family:var(--mono);font-size:0.65rem;color:var(--cyan);letter-spacing:0.15em;text-transform:uppercase}
+.field-group input,
+.field-group select,
+.field-group textarea{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--white);padding:0.85rem 1rem;
+  font-family:var(--display);font-size:0.9rem;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+  resize:none;
+}
+.field-group input::placeholder,
+.field-group textarea::placeholder{color:var(--muted)}
+.field-group input:focus,
+.field-group select:focus,
+.field-group textarea:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(0,200,255,0.08);
+}
+.field-group select option{background:var(--bg2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.submit-btn{
+  background:transparent;border:1px solid var(--cyan);color:var(--cyan);
+  padding:1rem;font-family:var(--mono);font-size:0.8rem;font-weight:700;
+  letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;
+  transition:background 0.2s,color 0.2s,box-shadow 0.3s;
+  margin-top:0.5rem;
+}
+.submit-btn:hover{
+  background:var(--cyan);color:var(--bg);
+  box-shadow:0 0 30px rgba(0,200,255,0.3);
+}
+
+/* FOOTER */
+footer{
+  background:var(--bg);border-top:1px solid var(--border);
+  padding:2.5rem 3.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1.2rem;position:relative;z-index:1;
+}
+.footer-logo{font-family:var(--mono);font-size:1rem;color:var(--cyan);font-weight:700;letter-spacing:0.08em}
+.footer-meta{font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.1em}
+.footer-links{display:flex;gap:2rem}
+.footer-links a{font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s}
+.footer-links a:hover{color:var(--cyan)}
+
+/* ANIMATIONS */
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-in.in{opacity:1;transform:none}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.hero-pre{animation:fadeUp 0.5s ease both}
+.hero h1{animation:fadeUp 0.6s 0.1s ease both}
+.hero-sub{animation:fadeUp 0.6s 0.2s ease both}
+.hero-ctas{animation:fadeUp 0.6s 0.3s ease both}
+.hero-stats{animation:fadeUp 0.6s 0.4s ease both}
+
+@media(max-width:900px){
+  .terminal{display:none}
+  .apply-grid{grid-template-columns:1fr}
+  nav{padding:1rem 1.5rem}
+  .nav-links{display:none}
+  section{padding:4rem 1.5rem}
+  .hero{padding:7rem 1.5rem 3rem}
+  .tl-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .tl-grid{grid-template-columns:1fr}
+  .tl-item{border-right:none;border-bottom:1px solid var(--border)}
+  .form-row{grid-template-columns:1fr}
+  .hero-stats{gap:2rem}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo"><span class="bracket">[</span>NEXUS<span class="bracket">]</span></a>
+  <ul class="nav-links">
+    <li><a href="#projects">Live Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#timeline">Roadmap</a></li>
+    <li><a href="#leaderboard">Board</a></li>
+    <li><a href="#apply">Apply</a></li>
+  </ul>
+  <a href="#apply" class="nav-badge">[ ENROLL_NOW ]</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-pre">
+    <span>►</span> NEXUS_INTERNSHIP_v3.0 &nbsp;|&nbsp; BATCH_2025 &nbsp;|&nbsp; <span class="live">● LIVE</span><span class="blink">_</span>
+  </div>
+  <h1>
+    <span class="word1">BUILD.</span>
+    <span class="word2">DEPLOY.</span>
+    <span class="word3">REPEAT.</span>
+  </h1>
+  <p class="hero-sub">
+    A 14-week immersive internship where you architect, build, and deploy real products
+    to real users — with senior engineers reviewing every commit.
+  </p>
+  <div class="hero-ctas">
+    <a href="#apply" class="btn-glow">Enroll Now →</a>
+    <a href="#projects" class="btn-outline">View Live Projects</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">97<span style="font-size:1.2rem">%</span></div><div class="label">placement rate</div></div>
+    <div class="stat"><div class="num">14</div><div class="label">weeks</div></div>
+    <div class="stat"><div class="num">6</div><div class="label">live projects</div></div>
+    <div class="stat"><div class="num">48h</div><div class="label">mentor response</div></div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="t-dot" style="background:#ff5f56"></div>
+      <div class="t-dot" style="background:#ffbd2e"></div>
+      <div class="t-dot" style="background:#27c93f"></div>
+      <span class="t-title">nexus@intern:~$</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-line"><span class="t-prompt">nexus@intern:~$</span> <span class="t-cmd">git clone internship-2025</span></div>
+      <div class="t-line"><span class="t-out">Cloning into 'internship-2025'...</span></div>
+      <div class="t-line"><span class="t-out">Resolving deltas: 100%</span></div>
+      <div class="t-line" style="margin-top:0.6rem"><span class="t-prompt">nexus@intern:~$</span> <span class="t-cmd">npm install</span></div>
+      <div class="t-line"><span class="t-success">✓ 847 packages installed</span></div>
+      <div class="t-line" style="margin-top:0.6rem"><span class="t-prompt">nexus@intern:~$</span> <span class="t-cmd">npm run dev</span></div>
+      <div class="t-line"><span class="t-success">✓ Server running on :3000</span></div>
+      <div class="t-line"><span class="t-cyan">→ Local:   http://localhost:3000</span></div>
+      <div class="t-line"><span class="t-warn">→ First task: deploy to prod</span></div>
+      <div class="t-line" style="margin-top:0.6rem"><span class="t-prompt">nexus@intern:~$</span> <span class="typing-cursor"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker">
+    <span class="ticker-item"><span class="live">LIVE</span> <span class="sep">|</span> 3 interns deployed to prod today</span>
+    <span class="ticker-item"><span class="sep">→</span> Next cohort: June 2025</span>
+    <span class="ticker-item"><span class="sep">→</span> 12 companies hiring from demo day</span>
+    <span class="ticker-item"><span class="live">LIVE</span> <span class="sep">|</span> Task #4 due in 5 days</span>
+    <span class="ticker-item"><span class="sep">→</span> New stack: Rust + WebAssembly added</span>
+    <span class="ticker-item"><span class="sep">→</span> Avg salary after internship: ₹8.5 LPA</span>
+    <span class="ticker-item"><span class="live">LIVE</span> <span class="sep">|</span> 3 interns deployed to prod today</span>
+    <span class="ticker-item"><span class="sep">→</span> Next cohort: June 2025</span>
+    <span class="ticker-item"><span class="sep">→</span> 12 companies hiring from demo day</span>
+    <span class="ticker-item"><span class="live">LIVE</span> <span class="sep">|</span> Task #4 due in 5 days</span>
+    <span class="ticker-item"><span class="sep">→</span> New stack: Rust + WebAssembly added</span>
+    <span class="ticker-item"><span class="sep">→</span> Avg salary after internship: ₹8.5 LPA</span>
+  </div>
+</div>
+
+<!-- LIVE PROJECTS -->
+<section class="projects-section" id="projects">
+  <div class="section-tag">Live Projects</div>
+  <h2>Ship to <span style="color:var(--cyan)">Production</span></h2>
+  <p class="section-sub">Every project you build goes live. Real users. Real feedback. Real impact.</p>
+  <div class="projects-grid fade-in">
+
+    <div class="project-card" data-color="var(--cyan)">
+      <div class="project-id">
+        <span>PRJ-001 / WEEK 1–2</span>
+        <span class="status-badge status-live">● LIVE</span>
+      </div>
+      <h3>Developer Portfolio 2.0</h3>
+      <p>Build a stunning portfolio with animated transitions, case studies, and a blog. Deployed on Vercel with custom domain and 99.9% uptime SLA.</p>
+      <div class="progress-track"><div class="progress-bar" style="width:100%;background:var(--green)"></div></div>
+      <div class="progress-label"><span>COMPLETION</span><span>100%</span></div>
+      <div class="tech-stack">
+        <span class="tech">Next.js</span><span class="tech">Framer Motion</span>
+        <span class="tech">Tailwind</span><span class="tech">MDX</span><span class="tech">Vercel</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-id">
+        <span>PRJ-002 / WEEK 3–4</span>
+        <span class="status-badge status-build">⟳ IN BUILD</span>
+      </div>
+      <h3>Microservices API Gateway</h3>
+      <p>Design a production-grade API with rate limiting, caching, JWT auth, and auto-scaling. Full Swagger docs and Postman collection included.</p>
+      <div class="progress-track"><div class="progress-bar" style="width:65%;background:var(--orange)"></div></div>
+      <div class="progress-label"><span>COMPLETION</span><span>65%</span></div>
+      <div class="tech-stack">
+        <span class="tech">Node.js</span><span class="tech">Redis</span>
+        <span class="tech">PostgreSQL</span><span class="tech">Docker</span><span class="tech">Nginx</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-id">
+        <span>PRJ-003 / WEEK 5–6</span>
+        <span class="status-badge status-deploy">▲ DEPLOYING</span>
+      </div>
+      <h3>Real-Time Collaboration Tool</h3>
+      <p>Notion-like editor with live cursors, conflict resolution, version history, and team workspaces. WebSocket architecture with 1000+ concurrent users.</p>
+      <div class="progress-track"><div class="progress-bar" style="width:82%;background:var(--cyan)"></div></div>
+      <div class="progress-label"><span>COMPLETION</span><span>82%</span></div>
+      <div class="tech-stack">
+        <span class="tech">React</span><span class="tech">Socket.io</span>
+        <span class="tech">Y.js</span><span class="tech">MongoDB</span><span class="tech">AWS</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-id">
+        <span>PRJ-004 / WEEK 7–9</span>
+        <span class="status-badge status-live">● LIVE</span>
+      </div>
+      <h3>SaaS Analytics Platform</h3>
+      <p>Multi-tenant analytics dashboard with event tracking, funnel analysis, cohort charts, and automated reporting. Processes 1M+ events per day.</p>
+      <div class="progress-track"><div class="progress-bar" style="width:100%;background:var(--green)"></div></div>
+      <div class="progress-label"><span>COMPLETION</span><span>100%</span></div>
+      <div class="tech-stack">
+        <span class="tech">React</span><span class="tech">D3.js</span>
+        <span class="tech">ClickHouse</span><span class="tech">Kafka</span><span class="tech">GCP</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-id">
+        <span>PRJ-005 / WEEK 10–11</span>
+        <span class="status-badge status-build">⟳ IN BUILD</span>
+      </div>
+      <h3>AI Code Review Assistant</h3>
+      <p>GitHub bot that auto-reviews PRs using LLM, detects security issues, suggests improvements, and posts detailed code comments. CI/CD integrated.</p>
+      <div class="progress-track"><div class="progress-bar" style="width:45%;background:var(--orange)"></div></div>
+      <div class="progress-label"><span>COMPLETION</span><span>45%</span></div>
+      <div class="tech-stack">
+        <span class="tech">Python</span><span class="tech">LangChain</span>
+        <span class="tech">GitHub API</span><span class="tech">FastAPI</span><span class="tech">OpenAI</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-id">
+        <span>PRJ-006 / WEEK 12–14</span>
+        <span class="status-badge" style="background:rgba(255,45,120,0.1);color:var(--pink);border:1px solid rgba(255,45,120,0.3)">★ CAPSTONE</span>
+      </div>
+      <h3>Your Product — Your Vision</h3>
+      <p>Design, build, and launch your own startup idea from zero to production. Present on Demo Day to 50+ investors and hiring partners. Receive offers.</p>
+      <div class="progress-track"><div class="progress-bar" style="width:0%;background:var(--pink)"></div></div>
+      <div class="progress-label"><span>STARTS WEEK 12</span><span>UNLOCKED AT WEEK 11</span></div>
+      <div class="tech-stack">
+        <span class="tech">YOUR CHOICE</span><span class="tech">ANY STACK</span><span class="tech">FULL OWNERSHIP</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS & LINKS -->
+<section class="skills-section" id="skills">
+  <div class="section-tag">Resource Library</div>
+  <h2>Skills & <span style="color:var(--green)">Reference Links</span></h2>
+  <p class="section-sub">Every technology mapped to its best learning resource. No fluff, just the docs that matter.</p>
+  <div class="skills-grid fade-in">
+
+    <div class="skill-card sk1">
+      <div class="skill-num">01 // FRONTEND</div>
+      <h3>Modern CSS & HTML5</h3>
+      <p>Semantic markup, CSS Grid, Flexbox, custom properties, animations, and responsive design patterns.</p>
+      <div class="skill-links-list">
+        <a class="slink" href="https://developer.mozilla.org/en-US/docs/Web" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>MDN Web Docs<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://css-tricks.com/snippets/css/complete-guide-grid/" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>CSS Grid Complete Guide<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://web.dev/learn/css" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>web.dev Learn CSS<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://cssbattle.dev" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>CSS Battle (Practice)<span class="slink-arrow">→</span></a>
+      </div>
+    </div>
+
+    <div class="skill-card sk2">
+      <div class="skill-num">02 // JAVASCRIPT</div>
+      <h3>JS / TypeScript Mastery</h3>
+      <p>ES2024+, async patterns, design patterns, TypeScript generics, and performance optimization.</p>
+      <div class="skill-links-list">
+        <a class="slink" href="https://javascript.info" target="_blank"><span class="slink-dot" style="background:var(--green)"></span>javascript.info (Best)<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://www.typescriptlang.org/docs/" target="_blank"><span class="slink-dot" style="background:var(--green)"></span>TypeScript Handbook<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://tc39.es/ecma262/" target="_blank"><span class="slink-dot" style="background:var(--green)"></span>ECMAScript Spec<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://exercism.org/tracks/javascript" target="_blank"><span class="slink-dot" style="background:var(--green)"></span>Exercism JS Track<span class="slink-arrow">→</span></a>
+      </div>
+    </div>
+
+    <div class="skill-card sk3">
+      <div class="skill-num">03 // REACT ECOSYSTEM</div>
+      <h3>React & Next.js 15</h3>
+      <p>RSC, Server Actions, App Router, Zustand, React Query, testing with Vitest, and Storybook.</p>
+      <div class="skill-links-list">
+        <a class="slink" href="https://react.dev/learn" target="_blank"><span class="slink-dot" style="background:var(--orange)"></span>React Official Docs<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://nextjs.org/docs" target="_blank"><span class="slink-dot" style="background:var(--orange)"></span>Next.js 15 Docs<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://zustand-demo.pmnd.rs" target="_blank"><span class="slink-dot" style="background:var(--orange)"></span>Zustand State Mgmt<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://tanstack.com/query/latest/docs" target="_blank"><span class="slink-dot" style="background:var(--orange)"></span>TanStack Query v5<span class="slink-arrow">→</span></a>
+      </div>
+    </div>
+
+    <div class="skill-card sk4">
+      <div class="skill-num">04 // BACKEND</div>
+      <h3>Node, Python & APIs</h3>
+      <p>RESTful and GraphQL APIs, auth flows, middleware, caching strategies, and API security best practices.</p>
+      <div class="skill-links-list">
+        <a class="slink" href="https://nodejs.org/en/docs/guides" target="_blank"><span class="slink-dot" style="background:var(--pink)"></span>Node.js Guides<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://fastapi.tiangolo.com" target="_blank"><span class="slink-dot" style="background:var(--pink)"></span>FastAPI Docs<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://graphql.org/learn/" target="_blank"><span class="slink-dot" style="background:var(--pink)"></span>GraphQL Learn<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://owasp.org/www-project-api-security/" target="_blank"><span class="slink-dot" style="background:var(--pink)"></span>OWASP API Security<span class="slink-arrow">→</span></a>
+      </div>
+    </div>
+
+    <div class="skill-card sk5">
+      <div class="skill-num">05 // DATABASES</div>
+      <h3>SQL, NoSQL & Caching</h3>
+      <p>PostgreSQL performance, MongoDB aggregations, Redis patterns, Prisma ORM, and database design.</p>
+      <div class="skill-links-list">
+        <a class="slink" href="https://use-the-index-luke.com" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>SQL Indexing Bible<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://www.mongodb.com/docs/manual/" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>MongoDB Manual<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://redis.io/docs/data-types/" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>Redis Data Types<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://www.prisma.io/docs/concepts" target="_blank"><span class="slink-dot" style="background:var(--cyan)"></span>Prisma Concepts<span class="slink-arrow">→</span></a>
+      </div>
+    </div>
+
+    <div class="skill-card sk6">
+      <div class="skill-num">06 // DEVOPS & CLOUD</div>
+      <h3>Docker, CI/CD & AWS</h3>
+      <p>Containerization, Kubernetes basics, GitHub Actions pipelines, monitoring with Grafana, and cloud infrastructure.</p>
+      <div class="skill-links-list">
+        <a class="slink" href="https://docs.docker.com/guides/" target="_blank"><span class="slink-dot" style="background:var(--yellow)"></span>Docker Guides<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://docs.github.com/en/actions/writing-workflows" target="_blank"><span class="slink-dot" style="background:var(--yellow)"></span>GitHub Actions Workflows<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://aws.amazon.com/architecture/" target="_blank"><span class="slink-dot" style="background:var(--yellow)"></span>AWS Architecture Center<span class="slink-arrow">→</span></a>
+        <a class="slink" href="https://grafana.com/docs/grafana/latest/" target="_blank"><span class="slink-dot" style="background:var(--yellow)"></span>Grafana Monitoring<span class="slink-arrow">→</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="timeline-section" id="timeline">
+  <div class="section-tag">Program Roadmap</div>
+  <h2>14-Week <span style="color:var(--orange)">Roadmap</span></h2>
+  <p class="section-sub">From zero to production engineer in 14 intentional weeks.</p>
+  <div class="tl-grid fade-in">
+    <div class="tl-item" data-week="1">
+      <div class="tl-bar" style="background:linear-gradient(90deg,var(--cyan),var(--cyan2))"></div>
+      <div class="tl-phase">PHASE 01 · WK 1–2</div>
+      <h3>Foundation Sprint</h3>
+      <p>Git mastery, dev environment, HTML/CSS deep-dive, JS fundamentals, portfolio site shipped.</p>
+    </div>
+    <div class="tl-item" data-week="3">
+      <div class="tl-bar" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div>
+      <div class="tl-phase">PHASE 02 · WK 3–4</div>
+      <h3>JS & APIs</h3>
+      <p>Async JS, fetch API, REST principles, Postman, basic Express server, JWT auth pattern.</p>
+    </div>
+    <div class="tl-item" data-week="5">
+      <div class="tl-bar" style="background:linear-gradient(90deg,var(--orange),var(--yellow))"></div>
+      <div class="tl-phase">PHASE 03 · WK 5–7</div>
+      <h3>React & State</h3>
+      <p>React hooks, Next.js App Router, Zustand, TanStack Query, TypeScript integration.</p>
+    </div>
+    <div class="tl-item" data-week="8">
+      <div class="tl-bar" style="background:linear-gradient(90deg,var(--pink),var(--orange))"></div>
+      <div class="tl-phase">PHASE 04 · WK 8–10</div>
+      <h3>Backend & DB</h3>
+      <p>PostgreSQL, MongoDB, Redis caching, Docker, microservices intro, API gateway pattern.</p>
+    </div>
+    <div class="tl-item" data-week="11">
+      <div class="tl-bar" style="background:linear-gradient(90deg,var(--cyan),var(--green))"></div>
+      <div class="tl-phase">PHASE 05 · WK 11–12</div>
+      <h3>DevOps & Cloud</h3>
+      <p>CI/CD with GitHub Actions, AWS EC2 + S3, monitoring, performance optimization, security.</p>
+    </div>
+    <div class="tl-item" data-week="14">
+      <div class="tl-bar" style="background:linear-gradient(90deg,var(--yellow),var(--pink))"></div>
+      <div class="tl-phase">PHASE 06 · WK 13–14</div>
+      <h3>Capstone & Demo Day</h3>
+      <p>Ship your product, pitch to investors, receive job offers from 12+ hiring partners.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section class="leader-section" id="leaderboard">
+  <div class="section-tag">Leaderboard</div>
+  <h2>Current <span style="color:var(--yellow)">Cohort</span> Rankings</h2>
+  <p class="section-sub">Intern rankings updated weekly based on commits, code quality, and mentor scores.</p>
+  <table class="leader-table fade-in">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Intern</th>
+        <th>Projects Live</th>
+        <th>Commits</th>
+        <th>Score</th>
+        <th>XP Progress</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="rank-1">🥇 01</span></td>
+        <td><div class="intern-name">Aanya Singh</div><div class="intern-role">Full Stack Track</div></td>
+        <td><span style="color:var(--green);font-family:var(--mono)">4/6</span></td>
+        <td><span style="font-family:var(--mono)">347</span></td>
+        <td><span class="score">9840</span></td>
+        <td style="min-width:120px"><div class="xp-bar"><div class="xp-fill" style="width:98%"></div></div></td>
+      </tr>
+      <tr>
+        <td><span class="rank-2">🥈 02</span></td>
+        <td><div class="intern-name">Rohan Mehta</div><div class="intern-role">Backend Track</div></td>
+        <td><span style="color:var(--green);font-family:var(--mono)">4/6</span></td>
+        <td><span style="font-family:var(--mono)">298</span></td>
+        <td><span class="score">9210</span></td>
+        <td><div class="xp-bar"><div class="xp-fill" style="width:92%"></div></div></td>
+      </tr>
+      <tr>
+        <td><span class="rank-3">🥉 03</span></td>
+        <td><div class="intern-name">Priyanka Das</div><div class="intern-role">Frontend Track</div></td>
+        <td><span style="color:var(--green);font-family:var(--mono)">3/6</span></td>
+        <td><span style="font-family:var(--mono)">264</span></td>
+        <td><span class="score">8750</span></td>
+        <td><div class="xp-bar"><div class="xp-fill" style="width:87%"></div></div></td>
+      </tr>
+      <tr>
+        <td style="font-family:var(--mono);color:var(--muted)">04</td>
+        <td><div class="intern-name">Vikram Nair</div><div class="intern-role">Full Stack Track</div></td>
+        <td><span style="color:var(--orange);font-family:var(--mono)">3/6</span></td>
+        <td><span style="font-family:var(--mono)">231</span></td>
+        <td><span class="score">8120</span></td>
+        <td><div class="xp-bar"><div class="xp-fill" style="width:81%"></div></div></td>
+      </tr>
+      <tr>
+        <td style="font-family:var(--mono);color:var(--muted)">05</td>
+        <td><div class="intern-name">Sara Kapoor</div><div class="intern-role">AI/ML Track</div></td>
+        <td><span style="color:var(--orange);font-family:var(--mono)">2/6</span></td>
+        <td><span style="font-family:var(--mono)">189</span></td>
+        <td><span class="score">7640</span></td>
+        <td><div class="xp-bar"><div class="xp-fill" style="width:76%"></div></div></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- APPLY -->
+<section class="apply-section" id="apply">
+  <div class="section-tag">Enroll</div>
+  <div class="apply-grid">
+    <div class="apply-left">
+      <h2>Start Your <span style="color:var(--cyan)">Journey</span></h2>
+      <p class="section-sub" style="margin-bottom:0">Applications for Batch 2025 close May 31. Only 24 seats. No experience required — just drive.</p>
+      <div class="apply-info">
+        <div class="info-item">
+          <div class="info-icon">⚡</div>
+          <div><div class="info-title">Stipend Provided</div><div class="info-desc">₹5,000/month for all selected interns throughout the 14-week program.</div></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">🎓</div>
+          <div><div class="info-title">Certification + LOR</div><div class="info-desc">NEXUS-certified completion letter + LinkedIn-ready Letter of Recommendation.</div></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">🚀</div>
+          <div><div class="info-title">Job Placement Support</div><div class="info-desc">Access to our hiring network of 50+ companies. Mock interviews, resume help, referrals.</div></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">💻</div>
+          <div><div class="info-title">100% Remote</div><div class="info-desc">Work from anywhere. Daily standups at 9 AM IST. Weekly 1:1 mentor sessions.</div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="apply-form fade-in">
+        <div class="form-row">
+          <div class="field-group">
+            <label>First Name</label>
+            <input type="text" placeholder="Aanya" />
+          </div>
+          <div class="field-group">
+            <label>Last Name</label>
+            <input type="text" placeholder="Singh" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field-group">
+          <label>Track</label>
+          <select>
+            <option disabled selected value="">Choose your track</option>
+            <option>Full Stack Development</option>
+            <option>Frontend Engineering</option>
+            <option>Backend Engineering</option>
+            <option>AI / ML Integration</option>
+            <option>DevOps & Cloud</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label>GitHub URL</label>
+            <input type="url" placeholder="github.com/you" />
+          </div>
+          <div class="field-group">
+            <label>Experience</label>
+            <select>
+              <option disabled selected value="">Level</option>
+              <option>Beginner (0–6 months)</option>
+              <option>Intermediate (6–18 months)</option>
+              <option>Advanced (18+ months)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Why NEXUS? (60 words)</label>
+          <textarea rows="3" placeholder="What makes you the intern we want on our team..."></textarea>
+        </div>
+        <button class="submit-btn" onclick="handleSubmit(this)">[ SUBMIT_APPLICATION ]</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">[NEXUS]</div>
+  <div class="footer-meta">© 2025 NEXUS_LABS. ALL RIGHTS RESERVED. BUILD_v3.0.1</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Discord</a>
+    <a href="https://github.com" target="_blank">GitHub</a>
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  </div>
+</footer>
+
+<script>
+// Scroll fade-in
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      // Animate progress bars when projects section visible
+      if(e.target.classList.contains('projects-grid')){
+        setTimeout(()=>{
+          document.querySelectorAll('.progress-bar').forEach(b=>{
+            b.style.transition='width 1.5s cubic-bezier(0.4,0,0.2,1)';
+          });
+        },200);
+      }
+    }
+  });
+},{threshold:0.08});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+// Mouse glow on project cards
+document.querySelectorAll('.project-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width*100).toFixed(1)+'%';
+    const y=((e.clientY-r.top)/r.height*100).toFixed(1)+'%';
+    card.style.setProperty('--mx',x);
+    card.style.setProperty('--my',y);
+  });
+});
+
+// Submit handler
+function handleSubmit(btn){
+  btn.textContent='[ PROCESSING... ]';
+  btn.style.opacity='0.7';
+  setTimeout(()=>{
+    btn.textContent='[ ✓ APPLICATION_RECEIVED ]';
+    btn.style.borderColor='var(--green)';
+    btn.style.color='var(--green)';
+    btn.style.opacity='1';
+    setTimeout(()=>{
+      btn.textContent='[ SUBMIT_APPLICATION ]';
+      btn.style.borderColor='';btn.style.color='';
+    },4000);
+  },1800);
+}
+
+// Animate XP bars on scroll
+const xpObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.xp-fill').forEach(bar=>{
+        bar.style.transition='width 1.2s ease';
+      });
+    }
+  });
+},{threshold:0.2});
+const lt=document.querySelector('.leader-table');
+if(lt) xpObs.observe(lt);
+</script>
+</body>
+</html>
